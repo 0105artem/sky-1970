@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0d0612">
+<title>Небо Елены</title>
+<meta name="description" content="Путешествие по небу 14 ноября 1970 года">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+<div class="neb n1" aria-hidden="true"></div>
+<div class="neb n2" aria-hidden="true"></div>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div id="prog" aria-hidden="true"></div>
+<div id="ctl" aria-label="Управление видом">
+  <button type="button" id="snd" aria-label="Выключить музыку" aria-pressed="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z"/><path class="w" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.6 7.6 0 0 1 0 11"/><path class="x" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
+  <button type="button" class="z" id="zin" aria-label="Приблизить">+</button>
+  <button type="button" class="z" id="zout" aria-label="Отдалить">&minus;</button>
+  <button type="button" class="z" id="zreset" aria-label="Вернуть вид"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button>
+</div>
+<div id="tip" role="status"></div>
+<div id="sheet" aria-hidden="true"><div class="sh-bg"></div><div class="sh-box" role="dialog" aria-modal="true" aria-label="Подробнее"><button type="button" class="sh-x" aria-label="Закрыть">&times;</button><div class="sh-in"></div></div></div>
+
+<main id="story">
+
+<section class="sc hero" data-s="hero">
+  <div class="hero-in">
+    <div class="eyebrow">С днем рождения!</div>
+    <h1 id="heroName">Елена</h1>
+    <div class="hero-sub">14 ноября 2026</div>
+    <p class="hero-q">Ваше небо: сегодня и&nbsp;в&nbsp;день, когда Вы&nbsp;родились</p>
+  </div>
+  <div class="hint">листайте<i></i></div>
+</section>
+
+<section class="sc" data-s="parade">
+  <div class="stamp">14 ноября 2026 · небо над Петербургом</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Сегодня</div>
+    <h2>На небе <em>парад планет</em></h2>
+    <p>Сегодня, 14 ноября, Меркурий, Венера, Марс и&nbsp;Юпитер собрались в&nbsp;одной части неба. В&nbsp;Ваш день рождения такого не&nbsp;было с&nbsp;1997 года, а&nbsp;Марс и&nbsp;Юпитер стоят почти вплотную: в&nbsp;следующий раз так будет в&nbsp;2080-м.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="sunret">
+  <div class="stamp">14 ноября 2026</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">И в этот же день</div>
+    <h2>Солнце <em>вернулось</em> на&nbsp;свое место</h2>
+    <p>Раз в&nbsp;год, в&nbsp;день рождения, Солнце приходит в&nbsp;ту самую точку неба, где стояло, когда Вы&nbsp;родились. Астрологи называют это соляром: началом нового личного года.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="zodiac">
+  <div class="stamp">Как читать небо</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Золотая лента</div>
+    <h2>Знак и&nbsp;созвездие: <em>не&nbsp;одно и&nbsp;то&nbsp;же</em></h2>
+    <p>Золотая лента&nbsp;— зодиак: путь Солнца, разделенный на&nbsp;двенадцать равных знаков. Их отсчитывают от&nbsp;точки весеннего равноденствия, то есть от&nbsp;времен года, а&nbsp;не&nbsp;от&nbsp;звезд.</p>
+    <p>За&nbsp;две тысячи лет звезды сместились почти на&nbsp;целый знак, а&nbsp;астрология по-прежнему считает по&nbsp;ленте. Поэтому созвездие Скорпиона стоит левее своего знака.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="rewind">
+  <div class="year" id="year" aria-live="off">2026</div>
+  <div class="top"></div>
+  <div class="card late">
+    <div class="eyebrow">14 ноября 1970, 22:00 · Коряжма</div>
+    <h2>А так небо выглядело <em>в&nbsp;день, когда родились Вы</em></h2>
+    <p>Звезды за&nbsp;эти годы остались на&nbsp;местах. А&nbsp;планеты вернулись туда, где стояли тогда.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="gather">
+  <div class="stamp">14 ноября 1970, 22:00 · Коряжма</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Небо того дня</div>
+    <h2>Почти все планеты <em>рядом</em></h2>
+    <p>Восемь светил из&nbsp;десяти в&nbsp;тот день собрались на&nbsp;одной дуге неба, от&nbsp;Плутона до&nbsp;Меркурия. Редкая цельность.</p>
+    <p class="hintline">Коснитесь любого символа, звезды или созвездия, чтобы узнать, что это. Небо можно двигать в&nbsp;стороны и&nbsp;приближать, двойное касание возвращает вид.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="stellium">
+  <div class="stamp">Знак Скорпиона</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Главная особенность карты</div>
+    <h2>Три планеты <em>в&nbsp;Скорпионе</em></h2>
+    <p>Солнце, Венера и&nbsp;Юпитер стоят в&nbsp;одном знаке. Астрологи называют это стеллиумом: глубина, сила чувств и&nbsp;тяга к&nbsp;тайному становятся внутренним стержнем.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="sun">
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Суть · воля · путь</div>
+    <h2>Солнце <em>в&nbsp;Скорпионе</em></h2>
+    <p>Глубина вместо поверхности. Вам важно понять, что стоит за&nbsp;вещами: мотивы, причины, скрытые связи. Отсюда сильная интуиция, умение чувствовать людей и&nbsp;внутренняя сила, которая с&nbsp;годами только растет.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="venus">
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Красота · ценности</div>
+    <h2>Венера <em>в&nbsp;Скорпионе</em></h2>
+    <p>Притягательность и&nbsp;глубина. Вы тонко чувствуете настоящее: в&nbsp;людях, в&nbsp;вещах, в&nbsp;словах. Искренность для Вас важнее внешнего блеска, а&nbsp;тем, кто Вам дорог, Вы&nbsp;преданы всей душой.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="jupiter">
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Удача · мудрость</div>
+    <h2>Юпитер <em>в&nbsp;Скорпионе</em></h2>
+    <p>Удача приходит через глубину: через понимание людей, психологию, умение видеть суть. Юпитер рядом с&nbsp;Солнцем дарит щедрость и&nbsp;веру в&nbsp;то, что у&nbsp;всего есть смысл.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="mercury">
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Ум · слово</div>
+    <h2>Меркурий <em>в&nbsp;Стрельце</em></h2>
+    <p>Мышление широкое и&nbsp;ищущее смысл: интересны не&nbsp;отдельные факты, а&nbsp;общая картина. Рядом стоит Нептун, поэтому мысли часто приходят как озарения, образами.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="mars">
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Энергия · действие</div>
+    <h2>Марс <em>в&nbsp;Весах</em></h2>
+    <p>Энергия направлена на&nbsp;справедливость и&nbsp;гармонию между людьми. Рядом Уран: смелость действовать по-своему и&nbsp;находить неожиданные решения.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="moon">
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Чувства · душа</div>
+    <h2 id="moonTitle">Луна <em>в&nbsp;Близнецах</em></h2>
+    <p id="moonText">В&nbsp;тот вечер почти полная Луна стояла высоко над Коряжмой, неподалеку от&nbsp;Плеяд. Душе нужны живой разговор, новые идеи и&nbsp;движение мысли. Любопытство с&nbsp;годами не&nbsp;тускнеет.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="saturn">
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Опора · основа</div>
+    <h2>Сатурн <em>в&nbsp;Тельце</em></h2>
+    <p>Прочность и&nbsp;надежность: свой дом, проверенные люди, ценности, которые не&nbsp;меняются от&nbsp;моды. Умение ценить настоящее и&nbsp;строить надолго.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="asc" id="ascScene" hidden>
+  <div class="stamp">22:00 · восток над Коряжмой</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow" id="ascEyebrow">Каким Вас видит мир</div>
+    <h2 id="ascTitle">Асцендент</h2>
+    <p id="ascText"></p>
+  </div>
+</section>
+
+<section class="sc" data-s="wheel">
+  <div class="top" id="wheelTap"></div>
+  <div class="card wheelcard">
+    <div class="eyebrow" id="wEyebrow">Натальная карта</div>
+    <h2 id="wTitle">Все небо <em>в&nbsp;одном круге</em></h2>
+    <p id="wText">То&nbsp;же небо, свернутое в&nbsp;круг: двенадцать знаков и&nbsp;Ваши планеты на&nbsp;своих местах. Коснитесь планеты, чтобы узнать о&nbsp;ней.</p>
+    <button type="button" class="more" id="wMore" hidden>Подробнее</button>
+    <div class="chips" id="chips" role="group" aria-label="Планеты"></div>
+  </div>
+</section>
+
+
+
+<section class="sc" data-s="n6">
+  <div class="stamp">Нумерология</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Число жизненного пути</div>
+    <h2>Шесть: <em>забота и&nbsp;гармония</em></h2>
+    <div class="calc">14.11.1970 <i class="ar"></i> 24 <i class="ar"></i> 6</div>
+    <p>Сумма цифр даты рождения. Шестерка&nbsp;— хранительница дома: человек, к&nbsp;которому тянутся за&nbsp;теплом и&nbsp;советом.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="n1">
+  <div class="stamp">Нумерология</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Число имени</div>
+    <h2>Один: <em>энергия первой</em></h2>
+    <div class="calc">82 <i class="ar"></i> 10 <i class="ar"></i> 1</div>
+    <p>Сумма букв Вашего полного имени. Единица&nbsp;— умение начинать, решать и&nbsp;вести за&nbsp;собой.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="n33">
+  <div class="stamp">Нумерология</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Число души · мастер-число</div>
+    <h2>Тридцать три: <em>учитель сердца</em></h2>
+    <p>Гласные Вашего имени дают 33. Это редкое мастер-число, его не&nbsp;сокращают: дар поддерживать, вдохновлять и&nbsp;делиться мудростью.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="n4">
+  <div class="stamp">Нумерология</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">Число личности</div>
+    <h2>Четыре: <em>человек слова</em></h2>
+    <div class="calc">49 <i class="ar"></i> 13 <i class="ar"></i> 4</div>
+    <p>Сумма согласных имени. Так Вас видят со&nbsp;стороны: надежной, собранной, той, на&nbsp;кого можно положиться.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="square">
+  <div class="top">
+    <div class="square" id="square"></div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Квадрат Пифагора</div>
+    <h2>Сила <em>в&nbsp;цифрах даты</em></h2>
+    <p>Старинный способ читать дату рождения: ее цифры раскладывают по&nbsp;девяти ячейкам. У&nbsp;каждой ячейки свое качество, и&nbsp;чем больше в&nbsp;ней цифр, тем оно ярче.</p>
+    <p>У&nbsp;Вас ярче всего <b>1111</b>, характер и&nbsp;воля, <b>222</b>, энергия, и&nbsp;<b>444</b>, выносливость.</p>
+  </div>
+</section>
+
+<section class="sc" data-s="year">
+  <div class="stamp">Ваш новый личный год</div>
+  <div class="top"></div>
+  <div class="card">
+    <div class="eyebrow">14 ноября 2026&nbsp;— 13 ноября 2027</div>
+    <h2>Год восьмерки: <em>сила и&nbsp;результаты</em></h2>
+    <p>Сегодня начинается Ваш новый личный год. Восьмерка&nbsp;— время собирать плоды и&nbsp;укреплять то, что дорого. А&nbsp;положенная набок, она становится знаком бесконечности: все, что Вы&nbsp;отдаете, возвращается.</p>
+  </div>
+</section>
+
+<section class="sc wish" data-s="wish">
+  <div class="wish-in">
+    <div class="eyebrow">С днем рождения!</div>
+    <p class="wish-t">Елена, пусть звезды и&nbsp;дальше складываются в&nbsp;Вашу пользу, а&nbsp;числа подсказывают верные решения. Тепла рядом и&nbsp;года, полного смысла и&nbsp;света.</p>
+  </div>
+</section>
+
+</main>
+
+<script src="assets/data.js"></script>
+<script src="assets/figures.js"></script>
+<script src="assets/astro.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
