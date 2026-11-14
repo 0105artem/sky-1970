@@ -10,7 +10,8 @@ var BIRTH_TIME = '22:00';
 
 var S = window.SKY, RAD = Math.PI / 180, TAU = Math.PI * 2;
 document.documentElement.classList.add('js');
-var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+var reduce = /[?&]calm\b/.test(location.search);
+var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 /* ---------- математика ---------- */
 function n360(a) { a %= 360; return a < 0 ? a + 360 : a; }
@@ -364,7 +365,21 @@ document.addEventListener('click', function (e) {
   hideTip(); if (scene.wheel && sel) select(null);
 });
 /* осмотреться: тянуть в стороны, щипком приближать */
-var storyEl = document.getElementById('story');
+var storyEl = document.getElementById('story'), freeLook = false, freeBtn = document.getElementById('free'), freeBar = document.getElementById('freebar');
+var freeY = 0;
+function sy() { return freeLook ? freeY : window.scrollY; }
+/* свободный обзор: страницу «замораживаем» целиком, чтобы листать было нечего (iPhone иначе все равно листает) */
+function setFree(v) {
+  if (v === freeLook) return;
+  var de = document.documentElement;
+  if (v) { freeY = window.scrollY; freeLook = true; storyEl.style.position = 'fixed'; storyEl.style.left = '0'; storyEl.style.right = '0'; storyEl.style.top = -freeY + 'px'; hideTip(); }
+  else { de.style.scrollSnapType = 'none'; storyEl.style.position = ''; storyEl.style.left = ''; storyEl.style.right = ''; storyEl.style.top = ''; freeLook = false; resetLook(); window.scrollTo(0, freeY); setTimeout(function () { window.scrollTo(0, freeY); de.style.scrollSnapType = ''; }, 80); }
+  document.body.classList.toggle('free', v); freeBtn.setAttribute('aria-pressed', v ? 'true' : 'false');
+}
+function snapBack() { var y = window.scrollY, best = 0, bd = 1e9; for (var i = 0; i < tops.length; i++) if (Math.abs(tops[i] - y) < bd) { bd = Math.abs(tops[i] - y); best = tops[i]; } if (bd > 2) window.scrollTo(0, best); }
+freeBtn.addEventListener('click', function () { setFree(!freeLook); });
+freeBar.addEventListener('click', function () { setFree(false); });
+document.addEventListener('touchmove', function (e) { if ((freeLook || (e.touches && e.touches.length > 1 && !scene.cam.center)) && !(e.target.closest && e.target.closest('#sheet')) && e.cancelable) e.preventDefault(); }, { passive: false });
 function pdist() { var k = Object.keys(ptrs); return Math.hypot(ptrs[k[0]].x - ptrs[k[1]].x, ptrs[k[0]].y - ptrs[k[1]].y); }
 storyEl.addEventListener('pointerdown', function (e) {
   if (e.target.closest && e.target.closest('.card,.chip,button,a')) return;
@@ -374,13 +389,14 @@ storyEl.addEventListener('pointerdown', function (e) {
 window.addEventListener('pointermove', function (e) {
   var p = ptrs[e.pointerId]; if (!p) return;
   var n = Object.keys(ptrs).length, px = p.x, py = p.y; p.x = e.clientX; p.y = e.clientY;
-  if (n >= 2) { look.reset = false; look.zoom = look.zt = clamp(zoom0 * pdist() / pinch0, .6, 4); dragMoved = true; hideTip(); return; }
+  if (n >= 2) { look.reset = false; look.zoom = look.zt = clamp(zoom0 * pdist() / pinch0, .6, 4); dragMoved = true; hideTip();
+    var k2 = (camK0 || cam.k) * 2; if (scene.cam.wheel) return; look.yaw += (p.x - px) / k2; look.pitch = clamp(look.pitch + (p.y - py) / k2, -1.2, 1.2); return; }
   if (!dragMoved && Math.hypot(p.x - p.x0, p.y - p.y0) < 8) return;
-  if (!dragMoved && !p.m && Math.abs(p.y - p.y0) > Math.abs(p.x - p.x0)) { delete ptrs[e.pointerId]; return; }
+  if (!dragMoved && !p.m && !freeLook && Math.abs(p.y - p.y0) > Math.abs(p.x - p.x0)) { delete ptrs[e.pointerId]; return; }
   dragMoved = true; look.reset = false; hideTip();
   var k = camK0 ? cam.k : cam.k * look.zoom;
   if (scene.cam.wheel) { var d = Math.atan2(p.y - cam.cy, p.x - cam.cx) - Math.atan2(py - cam.cy, px - cam.cx); if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; look.roll += d; }
-  else { look.yaw += (p.x - px) / k; if (p.m) look.pitch = clamp(look.pitch + (p.y - py) / k, -1.2, 1.2); }
+  else { look.yaw += (p.x - px) / k; look.pitch = clamp(look.pitch + (p.y - py) / k, -1.2, 1.2); }
 });
 function pend(e) { delete ptrs[e.pointerId]; if (Object.keys(ptrs).length < 2) pinching = false; }
 function zoomBy(f) { look.reset = false; look.zt = clamp(look.zt * f, .6, 4); }
@@ -393,11 +409,11 @@ window.addEventListener('pointerup', pend); window.addEventListener('pointercanc
 /* если браузер сам не доводит прокрутку до экрана, доводим мы */
 var snapT = 0, touching = false;
 function snapNow() {
-  if (touching) return;
+  if (touching || IOS || freeLook) return;
   var y = window.scrollY, best = 0, bd = 1e9; for (var i = 0; i < tops.length; i++) { var d = Math.abs(tops[i] - y); if (d < bd) { bd = d; best = tops[i]; } }
   if (bd > 3 && bd < H) window.scrollTo({ top: best, behavior: reduce ? 'auto' : 'smooth' });
 }
-window.addEventListener('scroll', function () { hideTip(); clearTimeout(snapT); snapT = setTimeout(snapNow, 170); }, { passive: true });
+window.addEventListener('scroll', function () { if (freeLook) return; hideTip(); clearTimeout(snapT); snapT = setTimeout(snapNow, 170); }, { passive: true });
 window.addEventListener('touchstart', function () { touching = true; }, { passive: true });
 function tend() { touching = false; clearTimeout(snapT); snapT = setTimeout(snapNow, 220); }
 window.addEventListener('touchend', tend, { passive: true }); window.addEventListener('touchcancel', tend, { passive: true });
@@ -439,9 +455,9 @@ function sndSchedule(S0, ctx, until) {
   while (S0.next < until) {
     var t = Math.max(S0.next, ctx.currentTime + .02), ch = PROG[S0.chord % PROG.length], on = S0.voices.banks[S0.bank], off = S0.voices.banks[1 - S0.bank];
     for (var v = 0; v < 5; v++) {
-      var f = mtof(ch[v]), tv = t + v * .85;
+      var first = S0.chord === 0, f = mtof(ch[v]), tv = t + v * (first ? .2 : .85);
       on[v].o[0].frequency.setValueAtTime(f, t); on[v].o[1].frequency.setValueAtTime(f, t); on[v].hi.frequency.setValueAtTime(f * 2, t);
-      on[v].g.gain.setTargetAtTime(v === 0 ? .1 : .07, tv, 1.3); off[v].g.gain.setTargetAtTime(0, t + v * .5, 1.7);
+      on[v].g.gain.setTargetAtTime(v === 0 ? .1 : .07, tv, first ? .45 : 1.3); off[v].g.gain.setTargetAtTime(0, t + v * .5, 1.7);
     }
     S0.bank = 1 - S0.bank; S0.chord++; S0.next += CHORD_LEN;
   }
@@ -461,12 +477,14 @@ function sndStart() {
   try {
     if (!snd.ctx) {
       var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e2) {}
       snd.ctx = new AC(); snd.voices = sndBuild(snd.ctx, snd.ctx.destination); snd.master = snd.voices.master;
       snd.next = snd.ctx.currentTime + .15; snd.spark = snd.ctx.currentTime + 7;
       snd.timer = setInterval(function () { if (snd.on && snd.ctx.state === 'running') sndSchedule(snd, snd.ctx, snd.ctx.currentTime + 2.5); }, 800);
     }
     if (snd.ctx.state !== 'running') snd.ctx.resume();
-    snd.master.gain.setTargetAtTime(SND_VOL, snd.ctx.currentTime, 1.6);
+    snd.master.gain.setTargetAtTime(SND_VOL, snd.ctx.currentTime, .5);
+    if (snd.ctx.state === 'running') sndSchedule(snd, snd.ctx, snd.ctx.currentTime + 2.5); else snd.ctx.resume().then(function () { sndSchedule(snd, snd.ctx, snd.ctx.currentTime + 2.5); }, function () {});
   } catch (e) {}
 }
 function sndStop() { if (!snd.ctx) return; try { snd.master.gain.setTargetAtTime(0, snd.ctx.currentTime, .25); setTimeout(function () { if (!snd.on || document.hidden) snd.ctx.suspend(); }, 1200); } catch (e) {} }
@@ -494,8 +512,10 @@ var rollPhi = 0, rollVel = 0, camK0 = 0, groundK = 1, figA = 0, consTap = null, 
 var T = 0, Tanim = null, prevPX = new Float32Array(NB), prevPY = new Float32Array(NB), Tmoving = false;
 var FS = "'AstroSym','Noto Sans Symbols','Apple Symbols','Segoe UI Symbol',sans-serif";
 
+var lvhEl = document.createElement('div'); lvhEl.style.cssText = 'position:fixed;left:0;top:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none'; document.body.appendChild(lvhEl);
+function viewH() { return Math.max(window.innerHeight, lvhEl.offsetHeight || 0); }
 function layout() {
-  W = window.innerWidth; H = window.innerHeight;
+  W = window.innerWidth; H = viewH(); cv.style.height = H + 'px';
   portrait = W < 900 || W < H;
   if (portrait) { refW = W; FX = .5; FY = .36; } else { refW = Math.min(W * .6, H * 1.05); FX = .34; FY = .5; }
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
@@ -919,10 +939,10 @@ function frame(ms) {
   requestAnimationFrame(frame);
   var now = ms / 1000, dt = Math.min(.05, now - last || .016); last = now;
   /* активная сцена */
-  var y = window.scrollY + H * .5, i, idx = 0;
+  var y = sy() + H * .5, i, idx = 0;
   for (i = 0; i < tops.length; i++) if (tops[i] <= y) idx = i;
   if (idx !== cur) setScene(idx, now, cur < 0);
-  var maxS = document.documentElement.scrollHeight - H; prog.style.transform = 'scaleX(' + (maxS > 0 ? clamp(window.scrollY / maxS, 0, 1) : 0).toFixed(4) + ')';
+  var maxS = (tops[tops.length - 1] || 0); prog.style.transform = 'scaleX(' + (maxS > 0 ? clamp(sy() / maxS, 0, 1) : 0).toFixed(4) + ')';
   /* перемотка */
   var Tprev = T;
   var rollPrev = rollPhi; rollPhi = 0;
@@ -967,20 +987,40 @@ function frame(ms) {
   groundK = clamp(1 - (Math.abs(Math.atan2(zx, zy)) / RAD - 2.5) / 6, 0, 1);
   if (!scene.cam.wheel && !reduce && !tw.from) { cam.cx += Math.sin(now * .23) * 3; cam.cy += Math.cos(now * .19) * 3; }
 
+  var tDraw = performance.now();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
   drawGlow(); drawMW(now); drawCons(); drawFigure(); drawStars(now); drawEcliptic(); drawWheel(); drawPlanets(now); drawStarLabels(); drawGround(); drawParticles(now, dt); drawShoot(dt);
 
   /* если телефон не тянет, снижаем качество */
-  fAcc += dt; fN++;
-  if (fN >= 90) { var avg = fAcc / fN; fAcc = 0; fN = 0; if (avg > .026 && now > 4) { if (DPR > 1.01) { DPR = Math.max(1, DPR - .5); cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); } else quality = 0; } }
+  fAcc += (performance.now() - tDraw) / 1000; fN++;
+  if (fN >= 90) { var avg = fAcc / fN; fAcc = 0; fN = 0; if (avg > .011 && now > 4) { if (DPR > 1.01) { DPR = Math.max(1, DPR - .5); cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); } else quality = 0; } }
 }
 
 var rsT = 0;
-function onResize() { clearTimeout(rsT); rsT = setTimeout(function () { var w = window.innerWidth, h = window.innerHeight; if (w === W && h === H) return; layout(); if (!tw.from) retarget(last, true); }, 120); }
+function onResize() { clearTimeout(rsT); rsT = setTimeout(function () { var w = window.innerWidth, h = viewH(); if (w === W && h === H) return; layout(); if (!tw.from) retarget(last, true); }, 120); }
 window.addEventListener('resize', onResize); window.addEventListener('orientationchange', onResize);
 document.addEventListener('visibilitychange', function () { if (document.hidden) sndStop(); else if (snd.on && snd.ctx) sndStart();
   if (document.hidden) running = false; else if (!running) { running = true; last = 0; requestAnimationFrame(frame); } });
 
+function glideTo(y1, dur) {
+  var de = document.documentElement, y0 = window.scrollY, t0 = performance.now();
+  de.style.scrollSnapType = 'none';
+  (function step() {
+    var u = Math.min(1, (performance.now() - t0) / dur), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    window.scrollTo(0, y0 + (y1 - y0) * e);
+    if (u < 1) requestAnimationFrame(step); else setTimeout(function () { de.style.scrollSnapType = ''; }, 60);
+  })();
+}
+/* старт по касанию: iPhone разрешает звук только после нажатия */
+var startBtn = document.getElementById('start'), allSecs = document.querySelectorAll('.sc');
+if (startBtn && window.scrollY < 10 && !/[?&]nogate\b/.test(location.search)) {
+  document.body.classList.add('gate'); for (var gi = 1; gi < allSecs.length; gi++) allSecs[gi].hidden = true;
+  startBtn.addEventListener('click', function () {
+    for (var i = 1; i < allSecs.length; i++) allSecs[i].hidden = false;
+    document.body.classList.remove('gate'); layout(); sndStart();
+    setTimeout(function () { if (tops[1]) glideTo(tops[1], 1100); }, 250);
+  });
+}
 DPR = maxDPR; layout();
 if (document.fonts && document.fonts.load) {
   Promise.all([document.fonts.load("italic 300 100px 'Cormorant Garamond'", '0123456789'), document.fonts.load("20px 'AstroSym'", '☉♏'), document.fonts.load("500 12px Manrope", 'Солнце')])

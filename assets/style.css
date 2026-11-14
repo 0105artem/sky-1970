@@ -196,10 +196,6 @@ h2 em{font-style:italic;color:var(--gold2)}
   .calc{font-size:1.8rem}
 }
 
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
-  .js .hero h1 span,.js .hero .eyebrow,.js .hero-sub,.js .hero-q,.js .hint{opacity:1!important;transform:none!important;filter:none!important}
-}
 
 /* кнопки вида */
 #ctl{position:fixed;z-index:6;right:calc(10px + env(safe-area-inset-right,0px));top:calc(40px + var(--st));display:flex;flex-direction:row-reverse;gap:6px}
@@ -217,3 +213,24 @@ body.explore #ctl .z{opacity:1;pointer-events:auto}
 @media (min-width:900px) and (min-aspect-ratio:1/1){#ctl{top:auto;bottom:28px;right:auto;left:5vw;flex-direction:row;gap:8px}#ctl button{width:38px;height:38px}}
 
 .js .year{visibility:hidden}
+
+/* свободный обзор: палец двигает небо, а не листает */
+body.free .sc{touch-action:none}
+.sc[hidden]{display:none}
+body.free .card,body.free .stamp,body.free .hint{opacity:.0;pointer-events:none;transition:opacity .4s}
+body.free #free{background:rgba(194,65,107,.55);border-color:var(--gold2)}
+#freebar{position:fixed;z-index:6;left:50%;bottom:calc(26px + var(--sb));transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;padding:11px 18px;border-radius:999px;border:1px solid rgba(227,194,122,.5);background:rgba(20,8,23,.86);color:var(--gold2);font:500 .72rem/1 var(--sans);letter-spacing:.08em;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
+body.free #freebar{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+/* старт: одно касание открывает небо и включает музыку */
+.start{margin:2rem auto 0;display:flex;flex-direction:column;align-items:center;gap:16px;padding:8px 34px 10px;border:0;background:none;color:var(--gold2);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
+.start .ring{position:relative;width:92px;height:92px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(227,194,122,.75);background:radial-gradient(circle,rgba(227,194,122,.24),rgba(194,65,107,.12) 55%,transparent 72%);box-shadow:0 0 34px rgba(227,194,122,.28),inset 0 0 22px rgba(227,194,122,.14)}
+.start .ring::before,.start .ring::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1px solid rgba(227,194,122,.6);animation:ringout 2.8s ease-out infinite}
+.start .ring::after{animation-delay:1.4s}
+.start svg{animation:twk 2.8s ease-in-out infinite}
+.start .lbl{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(1.7rem,7.4vw,2.2rem);line-height:1;letter-spacing:.01em}
+.start:active{transform:scale(.95)}
+.js .start{opacity:0;animation:fade 1.4s 2.6s forwards}
+@keyframes ringout{from{transform:scale(1);opacity:.75}to{transform:scale(1.75);opacity:0}}
+@keyframes twk{50%{transform:scale(1.18) rotate(45deg);opacity:.8}}
+body.gate .hint,body.gate #ctl{display:none}
+body:not(.gate) .start{display:none}
